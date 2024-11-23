@@ -100,12 +100,17 @@ const OptimizedCV = ({ content }: OptimizedCVProps) => {
             <Download className="mr-2 h-4 w-4" />
             Text
           </Button>
-          <PDFDownloadLink 
-            document={<CVDocument content={content} />} 
+          <PDFDownloadLink
+            document={<CVDocument content={content} />}
             fileName="optimized-cv.pdf"
           >
             {({ loading }) => (
-              <Button variant="default" disabled={loading}>
+              loading ? 
+              <Button variant="default" disabled>
+                <Download className="mr-2 h-4 w-4" />
+                Loading...
+              </Button> :
+              <Button variant="default">
                 <Download className="mr-2 h-4 w-4" />
                 PDF
               </Button>
