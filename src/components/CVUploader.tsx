@@ -1,6 +1,10 @@
 import { useDropzone } from "react-dropzone";
 import { Upload } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { pdfjs } from 'react-pdf';
+
+// Initialize PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 interface CVUploaderProps {
   onCVText: (text: string) => void;
@@ -9,7 +13,7 @@ interface CVUploaderProps {
 const CVUploader = ({ onCVText }: CVUploaderProps) => {
   const { toast } = useToast();
 
-  const onDrop = (acceptedFiles: File[]) => {
+  const onDrop = async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file.type !== "application/pdf") {
       toast({
@@ -20,17 +24,44 @@ const CVUploader = ({ onCVText }: CVUploaderProps) => {
       return;
     }
 
-    // In a real implementation, this would use proper PDF parsing
-    const reader = new FileReader();
-    reader.onload = () => {
-      const text = reader.result as string;
-      onCVText(text);
+    try {
+      // Convert the File to ArrayBuffer
+      const arrayBuffer = await file.arrayBuffer();
+      // Load the PDF document
+      const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+      
+      let fullText = '';
+      
+      // Extract text from each page
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items
+          .map((item: any) => item.str)
+          .join(' ');
+        fullText += pageText + '\n\n';
+      }
+
+      // Format the text to be more readable
+      const formattedText = fullText
+        .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
+        .split(/\n\s*\n/)      // Split on empty lines
+        .filter(section => section.trim()) // Remove empty sections
+        .join('\n\n');         // Join with double newlines
+
+      onCVText(formattedText);
+      
       toast({
         title: "CV uploaded successfully",
         description: "Your CV has been uploaded and parsed",
       });
-    };
-    reader.readAsText(file);
+    } catch (error) {
+      toast({
+        title: "Error parsing PDF",
+        description: "There was an error reading your PDF file",
+        variant: "destructive",
+      });
+    }
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
