@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, PDFDownloadLinkProps } from '@react-pdf/renderer';
 import { ReactElement } from 'react';
 
 interface OptimizedCVProps {
@@ -89,13 +89,6 @@ const OptimizedCV = ({ content }: OptimizedCVProps) => {
     ));
   };
 
-  const DownloadButton = ({ loading }: { loading: boolean }): ReactElement => (
-    <Button variant="default" disabled={loading}>
-      <Download className="mr-2 h-4 w-4" />
-      {loading ? 'Loading...' : 'PDF'}
-    </Button>
-  );
-
   return (
     <Card className="p-6 space-y-4">
       <div className="flex justify-between items-center">
@@ -109,7 +102,12 @@ const OptimizedCV = ({ content }: OptimizedCVProps) => {
             document={<CVDocument content={content} />}
             fileName="optimized-cv.pdf"
           >
-            {({ loading }) => <DownloadButton loading={loading} />}
+            {({ loading }) => (
+              <Button variant="default" disabled={loading}>
+                <Download className="mr-2 h-4 w-4" />
+                {loading ? 'Loading...' : 'PDF'}
+              </Button>
+            )}
           </PDFDownloadLink>
         </div>
       </div>
