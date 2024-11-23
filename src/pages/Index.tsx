@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -29,13 +28,11 @@ const Index = () => {
     setIsProcessing(true);
     // In a real implementation, this would call an API to process the CV
     setTimeout(() => {
-      setOptimizedCV(
-        `Optimized version of your CV based on the job description:\n\n${cvText}\n\nOptimized for:\n${jobDescription}`
-      );
+      setOptimizedCV(cvText);
       setIsProcessing(false);
       toast({
         title: "Success!",
-        description: "Your CV has been optimized",
+        description: "Your CV has been optimized for ATS compatibility",
       });
     }, 2000);
   };
@@ -51,7 +48,7 @@ const Index = () => {
           <Card className="p-6 space-y-4">
             <h2 className="text-2xl font-semibold text-primary">Upload CV</h2>
             <CVUploader onCVText={setCvText} />
-            <div className="- my-2">
+            <div className="my-2">
               <p className="text-sm text-muted-foreground mb-2">Or paste your CV text:</p>
               <Textarea
                 placeholder="Paste your CV content here..."
@@ -87,9 +84,7 @@ const Index = () => {
           </Button>
         </div>
 
-        {optimizedCV && (
-          <OptimizedCV content={optimizedCV} />
-        )}
+        {optimizedCV && <OptimizedCV content={optimizedCV} />}
       </div>
     </div>
   );
