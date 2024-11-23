@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer';
+import { ReactElement } from 'react';
 
 interface OptimizedCVProps {
   content: string;
@@ -51,10 +52,9 @@ const OptimizedCV = ({ content }: OptimizedCVProps) => {
 
   const handleTextDownload = () => {
     const element = document.createElement("a");
-    // Format content for ATS by ensuring proper spacing and removing any special characters
     const formattedContent = content
-      .replace(/[^\w\s.,()-]/g, '') // Remove special characters except basic punctuation
-      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+      .replace(/[^\w\s.,()-]/g, '')
+      .replace(/\s+/g, ' ')
       .trim();
     
     const file = new Blob([formattedContent], { type: "text/plain" });
@@ -70,9 +70,7 @@ const OptimizedCV = ({ content }: OptimizedCVProps) => {
     });
   };
 
-  // Format the content by splitting sections and adding proper spacing
   const formatContent = (text: string) => {
-    // Split the content into sections based on double newlines
     const sections = text.split('\n\n');
     
     return sections.map((section, index) => (
@@ -91,6 +89,13 @@ const OptimizedCV = ({ content }: OptimizedCVProps) => {
     ));
   };
 
+  const DownloadButton = ({ loading }: { loading: boolean }): ReactElement => (
+    <Button variant="default" disabled={loading}>
+      <Download className="mr-2 h-4 w-4" />
+      {loading ? 'Loading...' : 'PDF'}
+    </Button>
+  );
+
   return (
     <Card className="p-6 space-y-4">
       <div className="flex justify-between items-center">
@@ -104,17 +109,7 @@ const OptimizedCV = ({ content }: OptimizedCVProps) => {
             document={<CVDocument content={content} />}
             fileName="optimized-cv.pdf"
           >
-            {({ loading }) => (
-              loading ? 
-              <Button variant="default" disabled>
-                <Download className="mr-2 h-4 w-4" />
-                Loading...
-              </Button> :
-              <Button variant="default">
-                <Download className="mr-2 h-4 w-4" />
-                PDF
-              </Button>
-            )}
+            {({ loading }) => <DownloadButton loading={loading} />}
           </PDFDownloadLink>
         </div>
       </div>
