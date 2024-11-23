@@ -11,7 +11,6 @@ const OptimizedCV = ({ content }: OptimizedCVProps) => {
   const { toast } = useToast();
 
   const handleDownload = () => {
-    // In a real implementation, this would generate a proper PDF
     const element = document.createElement("a");
     const file = new Blob([content], { type: "text/plain" });
     element.href = URL.createObjectURL(file);
@@ -26,6 +25,27 @@ const OptimizedCV = ({ content }: OptimizedCVProps) => {
     });
   };
 
+  // Format the content by splitting sections and adding proper spacing
+  const formatContent = (text: string) => {
+    // Split the content into sections based on the markers we added
+    const sections = text.split('\n\n');
+    
+    return sections.map((section, index) => (
+      <div key={index} className="mb-6 last:mb-0">
+        {section.split('\n').map((line, lineIndex) => (
+          <p 
+            key={lineIndex} 
+            className={`mb-2 last:mb-0 text-left ${
+              line.includes(':') ? 'font-semibold' : ''
+            }`}
+          >
+            {line}
+          </p>
+        ))}
+      </div>
+    ));
+  };
+
   return (
     <Card className="p-6 space-y-4">
       <div className="flex justify-between items-center">
@@ -35,8 +55,8 @@ const OptimizedCV = ({ content }: OptimizedCVProps) => {
           Download
         </Button>
       </div>
-      <div className="whitespace-pre-wrap bg-muted p-4 rounded-lg text-sm">
-        {content}
+      <div className="whitespace-pre-line bg-muted p-6 rounded-lg text-sm space-y-4">
+        {formatContent(content)}
       </div>
     </Card>
   );
