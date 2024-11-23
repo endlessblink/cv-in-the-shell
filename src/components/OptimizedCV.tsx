@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, PDFDownloadLinkProps } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, BlobProvider } from '@react-pdf/renderer';
 import { ReactElement } from 'react';
 
 interface OptimizedCVProps {
@@ -98,17 +98,25 @@ const OptimizedCV = ({ content }: OptimizedCVProps) => {
             <Download className="mr-2 h-4 w-4" />
             Text
           </Button>
-          <PDFDownloadLink
-            document={<CVDocument content={content} />}
-            fileName="optimized-cv.pdf"
-          >
-            {({ loading }) => (
-              <Button variant="default" disabled={loading}>
+          <BlobProvider document={<CVDocument content={content} />}>
+            {({ blob, url, loading }) => (
+              <Button 
+                variant="default" 
+                disabled={loading}
+                onClick={() => {
+                  if (url) {
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'optimized-cv.pdf';
+                    link.click();
+                  }
+                }}
+              >
                 <Download className="mr-2 h-4 w-4" />
                 {loading ? 'Loading...' : 'PDF'}
               </Button>
             )}
-          </PDFDownloadLink>
+          </BlobProvider>
         </div>
       </div>
       <article className="whitespace-pre-line bg-muted p-6 rounded-lg text-sm space-y-4">
