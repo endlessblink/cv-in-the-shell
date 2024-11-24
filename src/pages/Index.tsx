@@ -8,6 +8,7 @@ import CVUploader from "@/components/CVUploader";
 import JobDescription from "@/components/JobDescription";
 import OptimizedCV from "@/components/OptimizedCV";
 import { processCV } from "@/services/aiService";
+import { AISettings } from "@/components/AISettings";
 
 const Index = () => {
   const [cvText, setCvText] = useState("");
@@ -48,9 +49,12 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background p-6 md:p-12">
       <div className="max-w-4xl mx-auto space-y-8">
-        <h1 className="text-4xl font-bold text-primary text-center mb-8">
-          CV Optimizer
-        </h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-4xl font-bold text-primary">
+            CV Optimizer
+          </h1>
+          <AISettings />
+        </div>
         
         <div className="grid md:grid-cols-2 gap-6">
           <Card className="p-6 space-y-4">
