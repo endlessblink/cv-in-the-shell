@@ -1,20 +1,21 @@
 import OpenAI from 'openai';
 
-const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
-
-if (!API_KEY) {
-  throw new Error(
-    'OpenAI API key is missing. Please add VITE_OPENAI_API_KEY to your environment variables.'
-  );
-}
-
-const openai = new OpenAI({
-  apiKey: API_KEY,
-  dangerouslyAllowBrowser: true
-});
+const getOpenAIClient = () => {
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error(
+      'OpenAI API key is missing. Please add VITE_OPENAI_API_KEY to your environment variables.'
+    );
+  }
+  return new OpenAI({
+    apiKey,
+    dangerouslyAllowBrowser: true
+  });
+};
 
 export const processCV = async (cvText: string, jobDescription: string): Promise<string> => {
   try {
+    const openai = getOpenAIClient();
     const response = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
