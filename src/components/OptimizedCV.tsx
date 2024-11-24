@@ -2,14 +2,12 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, BlobProvider } from '@react-pdf/renderer';
-import { ReactElement } from 'react';
+import { Document, Page, Text, View, StyleSheet, BlobProvider } from '@react-pdf/renderer';
 
 interface OptimizedCVProps {
   content: string;
 }
 
-// Create styles for PDF
 const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
@@ -17,47 +15,76 @@ const styles = StyleSheet.create({
     padding: 30,
   },
   section: {
+    marginBottom: 20,
+  },
+  heading: {
+    fontSize: 16,
+    fontWeight: 'bold',
     marginBottom: 10,
+  },
+  subHeading: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 5,
   },
   text: {
     fontSize: 12,
     marginBottom: 5,
+    lineHeight: 1.5,
   },
-  heading: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 10,
+  contactInfo: {
+    fontSize: 12,
+    marginBottom: 3,
+  },
+  bulletPoint: {
+    marginLeft: 15,
+    fontSize: 12,
+    marginBottom: 5,
   },
 });
 
-// PDF Document component
-const CVDocument = ({ content }: { content: string }) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      {content.split('\n\n').map((section, index) => (
-        <View key={index} style={styles.section}>
-          {section.split('\n').map((line, lineIndex) => (
-            <Text key={lineIndex} style={styles.text}>
-              {line}
-            </Text>
-          ))}
-        </View>
-      ))}
-    </Page>
-  </Document>
-);
+const CVDocument = ({ content }: { content: string }) => {
+  const sections = content.split('\n\n');
+  
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        {sections.map((section, index) => {
+          const lines = section.split('\n');
+          const isHeading = lines[0].toUpperCase() === lines[0];
+          
+          return (
+            <View key={index} style={styles.section}>
+              {isHeading ? (
+                <>
+                  <Text style={styles.heading}>{lines[0]}</Text>
+                  {lines.slice(1).map((line, lineIndex) => (
+                    <Text key={lineIndex} style={styles.text}>
+                      {line.startsWith('•') ? line : line}
+                    </Text>
+                  ))}
+                </>
+              ) : (
+                lines.map((line, lineIndex) => (
+                  <Text key={lineIndex} style={styles.text}>
+                    {line}
+                  </Text>
+                ))
+              )}
+            </View>
+          );
+        })}
+      </Page>
+    </Document>
+  );
+};
 
 const OptimizedCV = ({ content }: OptimizedCVProps) => {
   const { toast } = useToast();
 
   const handleTextDownload = () => {
     const element = document.createElement("a");
-    const formattedContent = content
-      .replace(/[^\w\s.,()-]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-    
-    const file = new Blob([formattedContent], { type: "text/plain" });
+    const file = new Blob([content], { type: "text/plain" });
     element.href = URL.createObjectURL(file);
     element.download = "optimized-cv.txt";
     document.body.appendChild(element);
@@ -73,20 +100,33 @@ const OptimizedCV = ({ content }: OptimizedCVProps) => {
   const formatContent = (text: string) => {
     const sections = text.split('\n\n');
     
-    return sections.map((section, index) => (
-      <section key={index} className="mb-6 last:mb-0">
-        {section.split('\n').map((line, lineIndex) => (
-          <p 
-            key={lineIndex} 
-            className={`mb-2 last:mb-0 text-left ${
-              line.includes(':') ? 'font-semibold' : ''
-            }`}
-          >
-            {line}
-          </p>
-        ))}
-      </section>
-    ));
+    return sections.map((section, index) => {
+      const lines = section.split('\n');
+      const isHeading = lines[0].toUpperCase() === lines[0];
+      
+      return (
+        <section key={index} className="mb-6 last:mb-0">
+          {isHeading ? (
+            <>
+              <h3 className="text-xl font-bold mb-3">{lines[0]}</h3>
+              <div className="space-y-2">
+                {lines.slice(1).map((line, lineIndex) => (
+                  <p key={lineIndex} className={`${line.startsWith('•') ? 'ml-4' : ''}`}>
+                    {line}
+                  </p>
+                ))}
+              </div>
+            </>
+          ) : (
+            lines.map((line, lineIndex) => (
+              <p key={lineIndex} className="mb-2 last:mb-0">
+                {line}
+              </p>
+            ))
+          )}
+        </section>
+      );
+    });
   };
 
   return (
@@ -99,7 +139,7 @@ const OptimizedCV = ({ content }: OptimizedCVProps) => {
             Text
           </Button>
           <BlobProvider document={<CVDocument content={content} />}>
-            {({ blob, url, loading }) => (
+            {({ url, loading }) => (
               <Button 
                 variant="default" 
                 disabled={loading}

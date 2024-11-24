@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import CVUploader from "@/components/CVUploader";
 import JobDescription from "@/components/JobDescription";
 import OptimizedCV from "@/components/OptimizedCV";
+import { processCV } from "@/services/aiService";
 
 const Index = () => {
   const [cvText, setCvText] = useState("");
@@ -26,15 +27,22 @@ const Index = () => {
     }
 
     setIsProcessing(true);
-    // In a real implementation, this would call an API to process the CV
-    setTimeout(() => {
-      setOptimizedCV(cvText);
-      setIsProcessing(false);
+    try {
+      const processedCV = await processCV(cvText, jobDescription);
+      setOptimizedCV(processedCV);
       toast({
         title: "Success!",
         description: "Your CV has been optimized for ATS compatibility",
       });
-    }, 2000);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to process your CV. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
