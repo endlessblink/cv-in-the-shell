@@ -1,7 +1,15 @@
 import OpenAI from 'openai';
 
+const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+
+if (!API_KEY) {
+  throw new Error(
+    'OpenAI API key is missing. Please add VITE_OPENAI_API_KEY to your environment variables.'
+  );
+}
+
 const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+  apiKey: API_KEY,
   dangerouslyAllowBrowser: true
 });
 
@@ -25,6 +33,6 @@ export const processCV = async (cvText: string, jobDescription: string): Promise
     return response.choices[0].message.content || cvText;
   } catch (error) {
     console.error('Error processing CV:', error);
-    return cvText;
+    throw new Error('Failed to process CV. Please ensure your API key is valid and try again.');
   }
 };
