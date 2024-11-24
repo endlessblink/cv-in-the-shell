@@ -57,7 +57,12 @@ export const processCV = async (cvText: string, jobDescription: string): Promise
           content: `Please optimize and structure this CV content, considering this job description: ${jobDescription}\n\nCV Content: ${cvText}. Format the CV content into clear sections: PERSONAL INFO, PROFESSIONAL SUMMARY, TECHNICAL SKILLS, PROFESSIONAL EXPERIENCE, and EDUCATION. Maintain all original information but structure it clearly.`
         }]
       });
-      return response.content[0].text || cvText;
+      
+      // Handle the response content safely
+      if (response.content && response.content[0] && typeof response.content[0].text === 'string') {
+        return response.content[0].text;
+      }
+      return cvText;
     }
   } catch (error) {
     console.error('Error processing CV:', error);
