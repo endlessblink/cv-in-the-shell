@@ -60,7 +60,7 @@ export const processCV = async (cvText: string, jobDescription: string): Promise
       
       // Handle the response content safely
       const content = response.content[0];
-      if (content && 'value' in content) {
+      if (content && 'value' in content && typeof content.value === 'string') {
         return content.value;
       }
       return cvText;
