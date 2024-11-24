@@ -27,9 +27,13 @@ const getAnthropicClient = () => {
 };
 
 export const processCV = async (cvText: string, jobDescription: string): Promise<string> => {
+  if (!cvText || !jobDescription) {
+    throw new Error('CV text and job description are required');
+  }
+
+  const provider = localStorage.getItem('aiProvider') || 'openai';
+  
   try {
-    const provider = localStorage.getItem('aiProvider') || 'openai';
-    
     if (provider === 'openai') {
       const openai = getOpenAIClient();
       const response = await openai.chat.completions.create({
@@ -46,7 +50,12 @@ export const processCV = async (cvText: string, jobDescription: string): Promise
         ],
         temperature: 0.7,
       });
-      return response.choices[0].message.content || cvText;
+
+      if (!response.choices[0]?.message?.content) {
+        throw new Error('No response received from OpenAI');
+      }
+
+      return response.choices[0].message.content;
     } else {
       const anthropic = getAnthropicClient();
       const response = await anthropic.messages.create({
@@ -60,13 +69,20 @@ export const processCV = async (cvText: string, jobDescription: string): Promise
       
       // Handle the response content safely
       const content = response.content[0];
-      if (content && 'value' in content && typeof content.value === 'string') {
-        return content.value;
+      if (!content || !('value' in content) || typeof content.value !== 'string') {
+        throw new Error('Invalid response received from Anthropic');
       }
-      return cvText;
+
+      return content.value;
     }
   } catch (error) {
     console.error('Error processing CV:', error);
-    throw error;
+    if (error instanceof Error) {
+      if (error.message.includes('API key')) {
+        throw new Error('Please configure your AI provider API key in settings');
+      }
+      throw new Error(`Failed to process CV: ${error.message}`);
+    }
+    throw new Error('An unexpected error occurred while processing your CV');
   }
 };
