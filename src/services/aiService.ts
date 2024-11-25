@@ -22,7 +22,8 @@ const getAnthropicClient = () => {
     );
   }
   return new Anthropic({
-    apiKey
+    apiKey,
+    dangerouslyAllowBrowser: true
   });
 };
 
