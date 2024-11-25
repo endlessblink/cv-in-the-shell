@@ -4,32 +4,22 @@ import Anthropic from '@anthropic-ai/sdk';
 const getOpenAIClient = () => {
   const apiKey = localStorage.getItem('openaiApiKey');
   if (!apiKey) {
-    throw new Error(
-      'OpenAI API key is missing. Please configure it in settings.'
-    );
+    throw new Error('OpenAI API key is missing. Please configure it in settings.');
   }
-  return new OpenAI({
-    apiKey,
-    dangerouslyAllowBrowser: true
-  });
+  return new OpenAI({ apiKey });
 };
 
 const getAnthropicClient = () => {
   const apiKey = localStorage.getItem('anthropicApiKey');
   if (!apiKey) {
-    throw new Error(
-      'Anthropic API key is missing. Please configure it in settings.'
-    );
+    throw new Error('Anthropic API key is missing. Please configure it in settings.');
   }
-  return new Anthropic({
-    apiKey,
-    dangerouslyAllowBrowser: true
-  });
+  return new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
 };
 
-export const processCV = async (cvText: string, jobDescription: string): Promise<string> => {
+export const processCV = async (cvText: string, jobDescription: string) => {
   if (!cvText || !jobDescription) {
-    throw new Error('CV text and job description are required');
+    throw new Error('Both CV and job description are required');
   }
 
   const provider = localStorage.getItem('aiProvider') || 'openai';
@@ -43,33 +33,29 @@ export const processCV = async (cvText: string, jobDescription: string): Promise
     if (provider === 'openai') {
       const openai = getOpenAIClient();
       const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-4",
         messages: [
           {
             role: "system",
-            content: "You are a professional CV optimizer. Format the provided CV content into clear sections: PERSONAL INFO, PROFESSIONAL SUMMARY, TECHNICAL SKILLS, PROFESSIONAL EXPERIENCE, and EDUCATION. Maintain all original information but structure it clearly."
+            content: "You are an expert ATS (Applicant Tracking System) optimization assistant. Your task is to analyze CVs and optimize them for ATS compatibility while maintaining their professional tone and highlighting relevant qualifications based on the job description provided."
           },
           {
             role: "user",
-            content: `Please optimize and structure this CV content, considering this job description: ${jobDescription}\n\nCV Content: ${cvText}`
+            content: `Please optimize this CV for ATS compatibility based on this job description:\n\nJob Description:\n${jobDescription}\n\nCV:\n${cvText}`
           }
         ],
         temperature: 0.7,
       });
 
-      if (!response.choices[0]?.message?.content) {
-        throw new Error('No response received from OpenAI');
-      }
-
-      return response.choices[0].message.content;
+      return response.choices[0]?.message?.content || 'Failed to optimize CV';
     } else {
       const anthropic = getAnthropicClient();
       const response = await anthropic.messages.create({
-        model: "claude-3-opus-20240229",
-        max_tokens: 4096,
+        model: "claude-2",
+        max_tokens: 1500,
         messages: [{
           role: "user",
-          content: `Please optimize and structure this CV content, considering this job description: ${jobDescription}\n\nCV Content: ${cvText}. Format the CV content into clear sections: PERSONAL INFO, PROFESSIONAL SUMMARY, TECHNICAL SKILLS, PROFESSIONAL EXPERIENCE, and EDUCATION. Maintain all original information but structure it clearly.`
+          content: `Please optimize this CV for ATS compatibility based on this job description:\n\nJob Description:\n${jobDescription}\n\nCV:\n${cvText}`
         }]
       });
       
@@ -77,7 +63,7 @@ export const processCV = async (cvText: string, jobDescription: string): Promise
       if (!content || !('value' in content) || typeof content.value !== 'string') {
         throw new Error('Invalid response received from Anthropic');
       }
-
+      
       return content.value;
     }
   } catch (error) {
