@@ -22,3 +22,21 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Vercel
+.vercel
+
+# Coverage directory
+coverage
+.nyc_output
+
+# Cache
+.cache
+.mf
+.rollup.cache
+tsconfig.tsbuildinfo

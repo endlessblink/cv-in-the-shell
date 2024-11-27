@@ -1,0 +1,19 @@
+run = "npm run dev"
+hidden = [".config", "package-lock.json"]
+modules = ["nodejs-18:v3-20230608-f4cd419"]
+
+[nix]
+channel = "stable-23_05"
+
+[deployment]
+run = ["sh", "-c", "npm run dev"]
+deploymentTarget = "cloudrun"
+ignorePorts = false
+
+[languages]
+[languages.typescript]
+pattern = "**/{*.ts,*.js,*.tsx,*.jsx}"
+syntax = "typescript"
+
+[languages.typescript.languageServer]
+start = "typescript-language-server --stdio"

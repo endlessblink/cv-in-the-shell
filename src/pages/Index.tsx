@@ -15,15 +15,22 @@ const Index = () => {
   const [jobDescription, setJobDescription] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [optimizedCV, setOptimizedCV] = useState("");
+  const [error, setError] = useState("");
   const { toast } = useToast();
 
   const handleOptimize = async () => {
+    setError(""); // Clear any previous errors
+    
     if (!cvText || !jobDescription) {
-      toast({
-        title: "Missing Information",
-        description: "Please provide both a CV and job description",
-        variant: "destructive",
-      });
+      setError("Please provide both a CV and job description");
+      return;
+    }
+
+    const provider = localStorage.getItem("aiProvider") || "openai";
+    const apiKey = localStorage.getItem(`${provider}ApiKey`);
+
+    if (!apiKey) {
+      setError(`Please configure your ${provider === 'openai' ? 'OpenAI' : 'Anthropic'} API key in the settings (gear icon) before proceeding.`);
       return;
     }
 
@@ -36,14 +43,15 @@ const Index = () => {
         description: "Your CV has been optimized for ATS compatibility",
       });
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to process your CV. Please try again.",
-        variant: "destructive",
-      });
+      setError(error instanceof Error ? error.message : "An error occurred while processing your CV");
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleReset = () => {
+    setOptimizedCV("");
+    setError("");
   };
 
   return (
@@ -55,6 +63,12 @@ const Index = () => {
           </h1>
           <AISettings />
         </div>
+        
+        {error && (
+          <div className="bg-destructive/15 border-destructive/50 border rounded-lg p-4 text-destructive">
+            {error}
+          </div>
+        )}
         
         <div className="grid md:grid-cols-2 gap-6">
           <Card className="p-6 space-y-4">
@@ -96,7 +110,9 @@ const Index = () => {
           </Button>
         </div>
 
-        {optimizedCV && <OptimizedCV content={optimizedCV} />}
+        {optimizedCV && (
+          <OptimizedCV content={optimizedCV} onReset={handleReset} />
+        )}
       </div>
     </div>
   );

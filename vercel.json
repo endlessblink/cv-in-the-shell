@@ -1,0 +1,16 @@
+{
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "routes": [
+    {
+      "src": "/[^.]+",
+      "dest": "/",
+      "status": 200
+    }
+  ],
+  "env": {
+    "VITE_OPENAI_API_KEY": "@openai_api_key",
+    "VITE_ANTHROPIC_API_KEY": "@anthropic_api_key"
+  }
+}

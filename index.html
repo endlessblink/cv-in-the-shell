@@ -4,13 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>cv-sculptor</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+    <meta name="description" content="CV Sculptor - ATS-Friendly CV Optimizer" />
+    <meta name="author" content="CV Sculptor" />
     <meta property="og:image" content="/og-image.svg" />
     <meta http-equiv="Content-Security-Policy" content="
       default-src 'self';
-      connect-src 'self' https://api.openai.com https://api.anthropic.com https://*.sentry.io https://*.posthog.com;
-      script-src 'self' 'unsafe-inline' https://cdn.gpteng.co;
+      connect-src 'self' https://api.openai.com https://api.anthropic.com;
+      script-src 'self' 'unsafe-inline';
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
       font-src 'self' https://fonts.gstatic.com data:;
       img-src 'self' data: blob:;
@@ -19,7 +19,6 @@
 
   <body>
     <div id="root"></div>
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
