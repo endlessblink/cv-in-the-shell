@@ -56,110 +56,96 @@ const OptimizedCV: React.FC<OptimizedCVProps> = ({ content, onReset }) => {
         throw new Error('No content provided');
       }
 
-      // Use the same section splitting as the preview
-      const sections = content.split(/\n\n(?=[A-Z][A-Z\s]+(?:\n|:))/).filter(Boolean);
+      // Split content into sections
+      const sections = content.split('\n\n');
+      
+      // Process each section
+      sections.forEach((section) => {
+        // Skip empty sections
+        if (!section.trim()) return;
 
-      sections.forEach((section, sectionIndex) => {
-        const lines = section.trim().split('\n').filter(line => line.trim());
+        // Check for page break
+        checkPageBreak();
 
-        // Header section (name and contact)
-        if (sectionIndex === 0) {
-          const [name, ...contactInfo] = lines;
+        // Format headers and positions
+        const lines = section.split('\n');
+        const firstLine = lines[0].trim();
 
-          // Name with better positioning and larger size
+        // Section headers (all caps like EDUCATION, TECHNOLOGIES & CERTIFICATIONS)
+        if (firstLine.match(/^[A-Z\s&]+$/)) {
           doc.setFont('helvetica', 'bold');
-          doc.setFontSize(24); // Increased from 22 to match preview
-          const nameText = name.trim();
-          const nameWidth = doc.getTextWidth(nameText);
-          doc.text(nameText, (pageWidth - nameWidth) / 2, y);
-          y += 15;
+          doc.setFontSize(14);
+          doc.text(firstLine, margin.left, y);
+          y += doc.getFontSize() * 0.8; // Reduced spacing after section header
 
-          // Contact info with better spacing and alignment
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(11);
-          const contactText = contactInfo.join(' | ').trim();
-          const wrappedContact = wrapText(contactText, 11, contentWidth);
-          doc.text(wrappedContact, pageWidth / 2, y, {
-            align: 'center',
-            maxWidth: contentWidth
-          });
-          y += wrappedContact.length * 6 + 15; // Increased spacing after header
-          return;
-        }
+          // Add underline for section headers
+          doc.setDrawColor(100, 100, 100);
+          doc.line(margin.left, y - 2, pageWidth - margin.right, y - 2);
+          y += 6; // Reduced spacing after underline
 
-        // Add page break if needed before new section
-        if (y + 20 > pageHeight - margin.bottom) {
-          doc.addPage();
-          y = margin.top;
-        }
-
-        // Section header with better spacing and border
-        const [header, ...contentLines] = lines;
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(16); // Increased from 14 to match preview
-        doc.text(header.trim(), margin.left, y);
-        y += 8;
-        
-        // Add section header underline
-        doc.setDrawColor(200, 200, 200); // Light gray color for the line
-        doc.line(margin.left, y, pageWidth - margin.right, y);
-        y += 6;
-
-        // Process content lines with improved formatting
-        contentLines.forEach(line => {
-          const trimmedLine = line.trim();
-
-          // Check for page break
-          if (y + 15 > pageHeight - margin.bottom) {
-            doc.addPage();
-            y = margin.top;
-          }
-
-          if (trimmedLine.startsWith('•')) {
-            // Bullet points with better indentation and spacing
+          // Process remaining lines in this section
+          lines.slice(1).forEach(line => {
             doc.setFont('helvetica', 'normal');
-            doc.setFontSize(11);
-            const bulletText = trimmedLine.substring(1).trim();
-            const wrappedText = wrapText(bulletText, 11, contentWidth - 12);
-            
-            wrappedText.forEach((textLine, index) => {
-              if (index === 0) {
-                doc.text('•', margin.left + 3, y);
-              }
-              doc.text(textLine, margin.left + 10, y);
-              y += 6;
-            });
-            y += 3;
-
-          } else if (trimmedLine.includes('Tel Aviv, Israel')) {
-            // Job titles with better formatting and spacing
-            const [title, location] = trimmedLine.split('Tel Aviv, Israel').map(s => s.trim());
-            
-            doc.setFont('helvetica', 'bold');
             doc.setFontSize(12);
-            const wrappedTitle = wrapText(title, 12, contentWidth);
-            doc.text(wrappedTitle, margin.left, y);
-            y += wrappedTitle.length * 6;
+            if (line.trim()) {
+              doc.text(line.trim(), margin.left, y);
+              y += doc.getFontSize() * 0.8; // Reduced line spacing
+            }
+          });
+        }
+        // Position headers (job titles with dates)
+        else if (firstLine.match(/^[A-Za-z\s,&]+.*\([A-Za-z0-9\s-]+\)$/) || 
+                firstLine.includes("Video Editor") || 
+                firstLine.includes("Motion Designer")) {
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(12);
+          doc.text(firstLine, margin.left, y);
+          y += doc.getFontSize() * 0.8; // Reduced spacing after position title
 
+          // Process remaining lines in this section
+          lines.slice(1).forEach(line => {
             doc.setFont('helvetica', 'normal');
-            doc.setFontSize(11);
-            doc.setTextColor(100, 100, 100); // Gray color to match preview
-            const locationText = `Tel Aviv, Israel${location ? `, ${location}` : ''}`;
-            doc.text(locationText, margin.left, y);
-            doc.setTextColor(0, 0, 0); // Reset text color
-            y += 8;
+            doc.setFontSize(12);
+            if (line.trim()) {
+              // Handle bullet points
+              if (line.trim().startsWith('•')) {
+                const wrappedText = wrapText(line.trim(), doc.getFontSize(), contentWidth - 10);
+                wrappedText.forEach((textLine, idx) => {
+                  if (idx === 0) {
+                    doc.text('•', margin.left, y);
+                    doc.text(textLine.substring(1).trim(), margin.left + 8, y);
+                  } else {
+                    doc.text(textLine, margin.left + 8, y);
+                  }
+                  y += doc.getFontSize() * 0.8; // Reduced spacing between bullet points
+                });
+              } else {
+                const wrappedText = wrapText(line.trim(), doc.getFontSize(), contentWidth);
+                wrappedText.forEach(textLine => {
+                  doc.text(textLine, margin.left, y);
+                  y += doc.getFontSize() * 0.8; // Reduced line spacing
+                });
+              }
+            }
+          });
+        }
+        // Regular text
+        else {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(12);
+          lines.forEach(line => {
+            if (line.trim()) {
+              const wrappedText = wrapText(line.trim(), doc.getFontSize(), contentWidth);
+              wrappedText.forEach(textLine => {
+                doc.text(textLine, margin.left, y);
+                y += doc.getFontSize() * 0.8; // Reduced line spacing
+              });
+            }
+          });
+        }
 
-          } else {
-            // Regular text with better line spacing
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(11);
-            const wrappedText = wrapText(trimmedLine, 11, contentWidth);
-            doc.text(wrappedText, margin.left, y);
-            y += wrappedText.length * 6 + 2;
-          }
-        });
-
-        y += 12; // Increased spacing between sections
+        // Add smaller space after section
+        y += 6; // Reduced spacing between sections
       });
 
       // Save with a more descriptive filename
