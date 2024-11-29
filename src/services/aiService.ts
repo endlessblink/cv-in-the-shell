@@ -44,18 +44,18 @@ export const processCV = async (cvText: string, jobDescription: string) => {
   const systemPrompt = `You are an expert CV optimizer. Enhance this CV to match the job description while following these rules:
 
 1. CONTENT RULES:
-   - Do NOT add any introductory or concluding messages
-   - Do NOT include phrases like "Here is my optimized version" or "Please let me know"
    - Start directly with the name and contact information
-   - End with the last CV section
+   - Do NOT add any introductory text or headers
+   - Do NOT include phrases like "Here is my optimized version" or "Please let me know"
    - Keep all section headers in UPPERCASE
    - Preserve the professional structure
 
 2. FORMATTING RULES:
-   - Use double line breaks between sections
+   - Use single line breaks between sections
    - Use single line breaks within sections
    - Keep bullet points with proper indentation
    - Maintain consistent spacing
+   - Do NOT add extra blank lines
 
 3. OPTIMIZATION RULES:
    - Use keywords from the job description

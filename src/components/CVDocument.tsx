@@ -3,88 +3,64 @@ import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/rendere
 
 // Register fonts
 Font.register({
-  family: 'Open Sans',
+  family: 'Helvetica',
   fonts: [
-    { src: 'https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-regular.ttf' },
-    { src: 'https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-600.ttf', fontWeight: 600 },
-    { src: 'https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-700.ttf', fontWeight: 700 },
+    { src: 'https://cdn.jsdelivr.net/npm/helvetica@0.1.3/fonts/helvetica-regular.ttf' },
+    { src: 'https://cdn.jsdelivr.net/npm/helvetica@0.1.3/fonts/helvetica-bold.ttf', fontWeight: 700 },
   ],
 });
 
 // Create styles
 const styles = StyleSheet.create({
   page: {
-    padding: 40,
-    fontFamily: 'Open Sans',
-    fontSize: 11,
-    lineHeight: 1.5,
-    color: '#333',
-    width: '100%',
-    height: '100%',
+    padding: 30,
+    fontFamily: 'Helvetica',
+    fontSize: 12,
   },
   header: {
-    marginBottom: 24,
-    textAlign: 'center',
-    width: '100%',
+    marginBottom: 10,
   },
   name: {
-    fontSize: 24,
-    fontWeight: 700,
-    marginBottom: 10,
-    color: '#1a1a1a',
-    width: '100%',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
   },
   contactInfo: {
     fontSize: 11,
-    color: '#4a4a4a',
-    marginBottom: 6,
-    width: '100%',
+    color: '#333333',
+    marginBottom: 5,
   },
   section: {
-    marginBottom: 18,
-    width: '100%',
+    marginBottom: 8,
   },
   sectionTitle: {
     fontSize: 14,
-    fontWeight: 700,
-    marginBottom: 10,
-    color: '#2a2a2a',
-    borderBottom: '1 solid #eee',
-    paddingBottom: 6,
-    width: '100%',
-  },
-  jobTitle: {
-    fontSize: 12,
-    fontWeight: 600,
-    color: '#2a2a2a',
-    marginBottom: 3,
-    width: '100%',
-  },
-  location: {
-    fontSize: 11,
-    color: '#666',
+    fontWeight: 'bold',
     marginBottom: 6,
-    width: '100%',
+    textTransform: 'uppercase',
   },
   bulletPoint: {
     flexDirection: 'row',
-    marginBottom: 5,
-    paddingLeft: 12,
-    width: '100%',
+    marginBottom: 4,
   },
   bullet: {
     width: 15,
-    fontSize: 11,
+    marginRight: 5,
   },
   bulletText: {
     flex: 1,
-    paddingLeft: 8,
-    paddingRight: 15,
+  },
+  jobTitle: {
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  location: {
+    fontSize: 11,
+    color: '#666666',
+    marginBottom: 4,
   },
   text: {
-    marginBottom: 5,
-    width: '100%',
-    paddingRight: 15,
+    marginBottom: 4,
   },
 });
 
