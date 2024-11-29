@@ -40,3 +40,5 @@ coverage
 .mf
 .rollup.cache
 tsconfig.tsbuildinfo
+
+.vercel

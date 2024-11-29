@@ -20,10 +20,10 @@ const OptimizedCV: React.FC<OptimizedCVProps> = ({ content, onReset }) => {
     const pageWidth = doc.internal.pageSize.width;
     const pageHeight = doc.internal.pageSize.height;
     const margin = {
-      top: 20,
-      bottom: 20,
-      left: 20,
-      right: 20
+      top: 25,
+      bottom: 25,
+      left: 25,
+      right: 25
     };
     const contentWidth = pageWidth - margin.left - margin.right;
     let y = margin.top;
@@ -81,20 +81,23 @@ const OptimizedCV: React.FC<OptimizedCVProps> = ({ content, onReset }) => {
           doc.setFont('helvetica', 'bold');
           doc.setFontSize(14);
           doc.text(firstLine, margin.left, y);
-          y += doc.getFontSize() * 0.8; // Reduced spacing after section header
+          y += doc.getFontSize() * 1.2;
 
           // Add underline for section headers
           doc.setDrawColor(100, 100, 100);
           doc.line(margin.left, y - 2, pageWidth - margin.right, y - 2);
-          y += 6; // Reduced spacing after underline
+          y += 8;
 
           // Process remaining lines in this section
           lines.slice(1).forEach(line => {
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(12);
             if (line.trim()) {
-              doc.text(line.trim(), margin.left, y);
-              y += doc.getFontSize() * 0.8; // Reduced line spacing
+              const wrappedText = wrapText(line.trim(), doc.getFontSize(), contentWidth);
+              wrappedText.forEach(textLine => {
+                doc.text(textLine, margin.left, y);
+                y += doc.getFontSize() * 1.2;
+              });
             }
           });
         }
@@ -104,8 +107,13 @@ const OptimizedCV: React.FC<OptimizedCVProps> = ({ content, onReset }) => {
                 firstLine.includes("Motion Designer")) {
           doc.setFont('helvetica', 'bold');
           doc.setFontSize(12);
-          doc.text(firstLine, margin.left, y);
-          y += doc.getFontSize() * 0.8; // Reduced spacing after position title
+          
+          // Handle long titles by wrapping
+          const wrappedTitle = wrapText(firstLine, doc.getFontSize(), contentWidth);
+          wrappedTitle.forEach((titleLine, idx) => {
+            doc.text(titleLine, margin.left, y);
+            y += doc.getFontSize() * (idx === wrappedTitle.length - 1 ? 1.2 : 1);
+          });
 
           // Process remaining lines in this section
           lines.slice(1).forEach(line => {
@@ -114,21 +122,21 @@ const OptimizedCV: React.FC<OptimizedCVProps> = ({ content, onReset }) => {
             if (line.trim()) {
               // Handle bullet points
               if (line.trim().startsWith('•')) {
-                const wrappedText = wrapText(line.trim(), doc.getFontSize(), contentWidth - 10);
+                const wrappedText = wrapText(line.trim().substring(1).trim(), doc.getFontSize(), contentWidth - 10);
                 wrappedText.forEach((textLine, idx) => {
                   if (idx === 0) {
                     doc.text('•', margin.left, y);
-                    doc.text(textLine.substring(1).trim(), margin.left + 8, y);
+                    doc.text(textLine, margin.left + 8, y);
                   } else {
                     doc.text(textLine, margin.left + 8, y);
                   }
-                  y += doc.getFontSize() * 0.8; // Reduced spacing between bullet points
+                  y += doc.getFontSize() * 1.2;
                 });
               } else {
                 const wrappedText = wrapText(line.trim(), doc.getFontSize(), contentWidth);
                 wrappedText.forEach(textLine => {
                   doc.text(textLine, margin.left, y);
-                  y += doc.getFontSize() * 0.8; // Reduced line spacing
+                  y += doc.getFontSize() * 1.2;
                 });
               }
             }
@@ -143,14 +151,14 @@ const OptimizedCV: React.FC<OptimizedCVProps> = ({ content, onReset }) => {
               const wrappedText = wrapText(line.trim(), doc.getFontSize(), contentWidth);
               wrappedText.forEach(textLine => {
                 doc.text(textLine, margin.left, y);
-                y += doc.getFontSize() * 0.8; // Reduced line spacing
+                y += doc.getFontSize() * 1.2;
               });
             }
           });
         }
 
         // Add smaller space after section
-        y += 6; // Reduced spacing between sections
+        y += 6; 
       });
 
       // Save with a more descriptive filename

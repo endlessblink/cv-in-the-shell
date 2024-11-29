@@ -14,64 +14,77 @@ Font.register({
 // Create styles
 const styles = StyleSheet.create({
   page: {
-    padding: 30,
+    padding: 40,
     fontFamily: 'Open Sans',
     fontSize: 11,
     lineHeight: 1.5,
     color: '#333',
+    width: '100%',
+    height: '100%',
   },
   header: {
-    marginBottom: 20,
+    marginBottom: 24,
     textAlign: 'center',
+    width: '100%',
   },
   name: {
     fontSize: 24,
     fontWeight: 700,
-    marginBottom: 8,
+    marginBottom: 10,
     color: '#1a1a1a',
+    width: '100%',
   },
   contactInfo: {
     fontSize: 11,
     color: '#4a4a4a',
-    marginBottom: 4,
+    marginBottom: 6,
+    width: '100%',
   },
   section: {
-    marginBottom: 15,
+    marginBottom: 18,
+    width: '100%',
   },
   sectionTitle: {
     fontSize: 14,
     fontWeight: 700,
-    marginBottom: 8,
+    marginBottom: 10,
     color: '#2a2a2a',
     borderBottom: '1 solid #eee',
-    paddingBottom: 4,
+    paddingBottom: 6,
+    width: '100%',
   },
   jobTitle: {
     fontSize: 12,
     fontWeight: 600,
     color: '#2a2a2a',
-    marginBottom: 2,
+    marginBottom: 3,
+    width: '100%',
   },
   location: {
     fontSize: 11,
     color: '#666',
-    marginBottom: 4,
+    marginBottom: 6,
+    width: '100%',
   },
   bulletPoint: {
     flexDirection: 'row',
-    marginBottom: 4,
+    marginBottom: 5,
     paddingLeft: 12,
+    width: '100%',
   },
   bullet: {
-    width: 10,
+    width: 15,
     fontSize: 11,
   },
   bulletText: {
     flex: 1,
-    paddingLeft: 5,
+    paddingLeft: 8,
+    paddingRight: 15,
   },
   text: {
-    marginBottom: 4,
+    marginBottom: 5,
+    width: '100%',
+    paddingRight: 15,
   },
 });
 
@@ -80,7 +93,10 @@ interface CVDocumentProps {
 }
 
 const CVDocument: React.FC<CVDocumentProps> = ({ content }) => {
-  const sections = content.split(/\n\n(?=[A-Z][A-Z\s]+(?:\n|:))/).filter(Boolean);
+  const sections = content
+    .replace(/^Here is the online version of the CV:\s*/, '') // Remove the header text
+    .split(/\n\n(?=[A-Z][A-Z\s]+(?:\n|:))/)
+    .filter(Boolean);
 
   const renderSection = (section: string, index: number) => {
     const lines = section.trim().split('\n').filter(line => line.trim());
