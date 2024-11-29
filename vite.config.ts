@@ -14,19 +14,23 @@ export default defineConfig(({ mode }) => ({
     }
   },
   plugins: [
-    react(),
+    react({
+      jsxRuntime: 'automatic',
+      jsxImportSource: 'react'
+    })
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+      "@": path.resolve(__dirname, "./src")
+    }
   },
   optimizeDeps: {
-    include: ['@react-pdf/renderer', 'react-pdf', 'pdfjs-dist']
+    include: ['@react-pdf/renderer', 'react-pdf', 'pdfjs-dist', 'react', 'react-dom']
   },
   build: {
     commonjsOptions: {
-      include: [/@react-pdf\/renderer/, /react-pdf/, /pdfjs-dist/]
+      include: [/node_modules/],
+      transformMixedEsModules: true
     }
   }
 }));
