@@ -7,8 +7,8 @@ export default defineConfig(({ mode }) => ({
   server: {
     port: 5173,
     host: true,
-    cors: {
-      origin: ['http://localhost:5173', 'http://localhost:3000', 'https://gptengineer.app', 'https://lovable.dev'],
+    cors: mode === 'production' ? false : {
+      origin: ['http://localhost:5173'],
       methods: ['GET', 'POST'],
       credentials: true
     }
