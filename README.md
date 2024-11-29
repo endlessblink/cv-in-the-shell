@@ -1,4 +1,6 @@
-# Welcome to your Lovable project
+# CV In The Shell
+
+A modern, command-line inspired CV builder and manager.
 
 ## Project info
 
