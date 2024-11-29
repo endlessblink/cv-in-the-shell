@@ -57,7 +57,10 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 relative">
+          <div className="absolute right-0 top-0">
+            <AISettings />
+          </div>
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
             CV In The Shell
           </h1>

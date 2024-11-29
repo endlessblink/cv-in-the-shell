@@ -36,8 +36,12 @@ export const AISettings = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Settings className="h-4 w-4" />
+        <Button 
+          variant="outline" 
+          size="icon"
+          className="bg-primary/10 hover:bg-primary/20 border-primary/20 hover:border-primary/30"
+        >
+          <Settings className="h-4 w-4 text-primary" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
