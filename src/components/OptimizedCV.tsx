@@ -12,8 +12,10 @@ interface OptimizedCVProps {
 const OptimizedCV: React.FC<OptimizedCVProps> = ({ content, onReset }) => {
   // Format content for preview
   const formattedContent = content
-    // Remove introductory text
+    // Remove any AI-generated text
     .replace(/^Here is the optimized CV:[\n\s]*/i, '')
+    .replace(/^Here's the optimized version:[\n\s]*/i, '')
+    .replace(/^Here is my optimized version:[\n\s]*/i, '')
     .split('\n')
     .map((line, index) => {
       // Skip empty lines
@@ -22,15 +24,38 @@ const OptimizedCV: React.FC<OptimizedCVProps> = ({ content, onReset }) => {
       // Headers (all caps)
       if (line.trim().match(/^[A-Z][A-Z\s&]+$/)) {
         return (
-          <h2 key={index} className="text-lg font-bold mt-2 mb-1 text-white">
+          <h2 key={index} className="text-xl font-bold mt-6 mb-3 text-white border-b border-gray-700 pb-2">
             {line.trim()}
           </h2>
+        );
+      }
+
+      // Job titles and dates
+      if (line.includes('(') && line.includes(')') || 
+          line.includes('Producer') || 
+          line.includes('Designer') || 
+          line.includes('Editor') || 
+          line.includes('Artist') ||
+          line.includes('Department')) {
+        return (
+          <p key={index} className="text-lg font-semibold mt-4 mb-2 text-white">
+            {line.trim()}
+          </p>
+        );
+      }
+
+      // Bullet points
+      if (line.trim().startsWith('•')) {
+        return (
+          <p key={index} className="text-base mb-2 text-gray-300 pl-4">
+            {line.trim()}
+          </p>
         );
       }
       
       // Regular lines
       return (
-        <p key={index} className="text-base mb-1 text-gray-300">
+        <p key={index} className="text-base mb-2 text-gray-300">
           {line.trim()}
         </p>
       );
@@ -152,7 +177,7 @@ const OptimizedCV: React.FC<OptimizedCVProps> = ({ content, onReset }) => {
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-6">
         <Button 
           variant="outline" 
           onClick={onReset}
@@ -168,8 +193,8 @@ const OptimizedCV: React.FC<OptimizedCVProps> = ({ content, onReset }) => {
         </Button>
       </div>
       
-      <div className="bg-[#12111A] rounded-lg p-6">
-        <div className="space-y-1">
+      <div className="bg-[#12111A] rounded-lg p-8">
+        <div className="space-y-2">
           {formattedContent}
         </div>
       </div>
