@@ -42,49 +42,44 @@ export const processCV = async (cvText: string, jobDescription: string) => {
     throw new Error(`Please configure your ${provider === 'openai' ? 'OpenAI' : 'Anthropic'} API key in settings`);
   }
 
-  const systemPrompt = `You are an expert CV optimizer. Enhance this CV for the job description while following these rules:
+  const systemPrompt = `You are an expert CV optimizer. Enhance this CV for the job description while following these STRICT rules:
 
-1. TRUTHFUL OPTIMIZATION:
-   - Reorder bullet points to prioritize experience most relevant to the job
-   - Emphasize existing skills that match job requirements
-   - Use industry-standard terminology for skills you already have
-   - Highlight transferable skills from your actual experience
-   - Keep all content 100% truthful and based on real experience
+1. FORMATTING REQUIREMENTS:
+   - Start DIRECTLY with the name - NO introductory text whatsoever
+   - Use EXACTLY one blank line between sections
+   - Keep bullet points on single lines - NO wrapping
+   - Maintain consistent indentation for all bullet points
+   - Use UPPERCASE for all section headers
+   - Keep job titles and dates on the same line
+   - Remove ALL divider lines
 
-2. CONTENT PRESERVATION:
-   - Keep all original sections and experiences
-   - Maintain exact dates and positions
-   - Preserve all locations and company names
-   - Keep original qualifications and certifications
-   - Don't remove any experience, even if seems less relevant
+2. CONTENT STRUCTURE:
+   - Name and contact info first
+   - Each section header in UPPERCASE
+   - Job titles followed by company and dates on same line
+   - Bullet points for responsibilities and achievements
+   - Keep sections in original order
+   - NO duplicate section headers
 
-3. ENHANCEMENT TECHNIQUES:
-   - Move most relevant achievements to the top of each section
-   - Replace weak verbs with strong action verbs for existing achievements
-   - Add specific metrics or numbers if they were implied in original
-   - Align your existing technical terms with job requirements
-   - Expand abbreviations to match job description terminology
+3. TRUTHFUL OPTIMIZATION:
+   - Reorder bullet points to prioritize relevant experience
+   - Use industry-standard terms for existing skills
+   - Highlight transferable skills from actual experience
+   - Keep all content 100% truthful
 
 4. STRICT PROHIBITIONS:
-   - NO inventing new experiences or achievements
-   - NO adding skills or technologies not mentioned in original
-   - NO modifying dates, titles, or positions
-   - NO exaggerating responsibilities
-   - NO removing valid experience
-   - NO making assumptions about capabilities
-   - NO adding certifications or qualifications
-
-5. FORMATTING:
-   - Keep section headers in UPPERCASE
-   - Maintain professional structure
-   - Use consistent spacing
-   - Preserve bullet point style
-   - Remove any AI commentary or introductions
+   - NO introductory text or commentary
+   - NO added skills or technologies
+   - NO modified dates or positions
+   - NO exaggerated responsibilities
+   - NO duplicate content
+   - NO wrapped lines for bullet points
+   - NO extra spacing
 
 Here's the job description to optimize for:
 ${jobDescription}
 
-Original CV to optimize (maintain complete truthfulness):`;
+Original CV to optimize (maintain exact formatting rules):`;
 
   // Calculate approximate token count (rough estimate)
   const totalChars = systemPrompt.length + cvText.length + jobDescription.length;
