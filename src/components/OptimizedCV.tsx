@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { jsPDF } from 'jspdf';
-import { CVDocument } from './CVDocument';
+import CVDocument from './CVDocument';
 
 interface OptimizedCVProps {
   content: string;
