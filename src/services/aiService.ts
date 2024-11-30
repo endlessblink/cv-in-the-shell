@@ -20,12 +20,13 @@ const getAnthropicClient = () => {
 const cleanupCVContent = (content: string): string => {
   if (!content) return '';
 
-  // Basic cleanup while preserving original content
+  // Remove any header text variations
   return content
-    .replace(/^Here is the CV text with all content and formatting intact\n*/i, '') // Remove the unwanted header text
-    .replace(/\s+/g, ' ') // Normalize whitespace
-    .replace(/\n\s*\n/g, '\n\n') // Normalize multiple newlines
-    .replace(/•\s+/g, '• ') // Clean bullet point spacing
+    .replace(/^Here is (?:my|the|an?) (?:optimized )?version of the CV:?\s*/i, '')
+    .replace(/^Here is (?:my|the|an?) CV:?\s*/i, '')
+    .replace(/^Here is the online version:?\s*/i, '')
+    .replace(/^\s*NAME AND CONTACT INFO\s*/, '')  // Remove if it's the first line
+    .replace(/\n{3,}/g, '\n\n')  // Replace multiple newlines with double newlines
     .trim();
 };
 

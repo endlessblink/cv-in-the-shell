@@ -69,9 +69,16 @@ interface CVDocumentProps {
 }
 
 const CVDocument: React.FC<CVDocumentProps> = ({ content }) => {
-  const sections = content
-    .replace(/^Here is the online version of the CV:\s*/, '') // Remove the header text
-    .split(/\n\n(?=[A-Z][A-Z\s]+(?:\n|:))/)
+  // Clean up the content first
+  const cleanContent = content
+    .replace(/^Here is (?:my|the|an?) (?:optimized )?version of the CV:?\s*/i, '')
+    .replace(/^Here is (?:my|the|an?) CV:?\s*/i, '')
+    .replace(/^Here is the online version:?\s*/i, '')
+    .trim();
+
+  // Split into sections with proper spacing
+  const sections = cleanContent
+    .split(/\n{2,}(?=[A-Z][A-Z\s]+(?:\n|:))/)
     .filter(Boolean);
 
   const renderSection = (section: string, index: number) => {
