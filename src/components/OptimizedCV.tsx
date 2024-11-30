@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { PDFDownloadLink } from '@react-pdf/renderer';
 import { jsPDF } from 'jspdf';
+import { CVDocument } from './CVDocument';
 
 interface OptimizedCVProps {
   content: string;
@@ -9,10 +10,6 @@ interface OptimizedCVProps {
 }
 
 const OptimizedCV: React.FC<OptimizedCVProps> = ({ content, onReset }) => {
-  useEffect(() => {
-    console.log('CV Content:', content); // Debug log
-  }, [content]);
-
   // Format content for preview
   const formattedContent = content
     // Remove introductory text
@@ -25,32 +22,19 @@ const OptimizedCV: React.FC<OptimizedCVProps> = ({ content, onReset }) => {
       // Headers (all caps)
       if (line.trim().match(/^[A-Z][A-Z\s&]+$/)) {
         return (
-          <h2 key={index} className="text-lg font-bold mt-4 mb-2 pb-1 border-b border-gray-300">
+          <h2 key={index} className="text-lg font-bold mt-2 mb-1 text-white">
             {line.trim()}
           </h2>
-        );
-      }
-
-      // Job titles/positions (first line after company or first line of section)
-      if (line.includes('Producer') || 
-          line.includes('Designer') || 
-          line.includes('Editor') || 
-          line.includes('Artist') ||
-          line.includes('Department')) {
-        return (
-          <p key={index} className="text-base font-semibold mb-1 whitespace-pre-wrap">
-            {line.trim()}
-          </p>
         );
       }
       
       // Regular lines
       return (
-        <p key={index} className="text-base mb-1 whitespace-pre-wrap">
+        <p key={index} className="text-base mb-1 text-gray-300">
           {line.trim()}
         </p>
       );
-    }).filter(Boolean); // Remove null entries
+    }).filter(Boolean);
 
   const generatePDF = () => {
     const doc = new jsPDF({
@@ -143,52 +127,8 @@ const OptimizedCV: React.FC<OptimizedCVProps> = ({ content, onReset }) => {
               });
             }
           });
-        }
-        // Position headers (job titles with dates)
-        else if (firstLine.match(/^[A-Za-z\s,&]+.*\([A-Za-z0-9\s-]+\)$/) || 
-                firstLine.includes("Video Editor") || 
-                firstLine.includes("Motion Designer")) {
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(12);
-          
-          // Handle long titles by wrapping
-          const wrappedTitle = wrapText(firstLine, doc.getFontSize(), contentWidth);
-          wrappedTitle.forEach((titleLine, idx) => {
-            doc.text(titleLine, margin.left, y);
-            y += doc.getFontSize() * (idx === wrappedTitle.length - 1 ? 1.2 : 1);
-          });
-
-          // Process remaining lines in this section
-          lines.slice(1).forEach(line => {
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(12);
-            if (line.trim()) {
-              // Handle bullet points
-              if (line.trim().startsWith('•')) {
-                const wrappedText = wrapText(line.trim().substring(1).trim(), doc.getFontSize(), contentWidth - 10);
-                wrappedText.forEach((textLine, idx) => {
-                  if (idx === 0) {
-                    doc.text('•', margin.left, y);
-                    doc.text(textLine, margin.left + 8, y);
-                  } else {
-                    doc.text(textLine, margin.left + 8, y);
-                  }
-                  y += doc.getFontSize() * 1.2;
-                });
-              } else {
-                const wrappedText = wrapText(line.trim(), doc.getFontSize(), contentWidth);
-                wrappedText.forEach(textLine => {
-                  doc.text(textLine, margin.left, y);
-                  y += doc.getFontSize() * 1.2;
-                });
-              }
-            }
-          });
-        }
-        // Regular text
-        else {
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(12);
+        } else {
+          // Regular sections
           lines.forEach(line => {
             if (line.trim()) {
               const wrappedText = wrapText(line.trim(), doc.getFontSize(), contentWidth);
@@ -199,9 +139,7 @@ const OptimizedCV: React.FC<OptimizedCVProps> = ({ content, onReset }) => {
             }
           });
         }
-
-        // Add smaller space after section
-        y += 6; 
+        y += 8; // Add space between sections
       });
 
       // Save with a more descriptive filename
@@ -213,21 +151,28 @@ const OptimizedCV: React.FC<OptimizedCVProps> = ({ content, onReset }) => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-4">
-      <div className="flex justify-between items-center my-8">
-        <Button variant="outline" onClick={onReset}>
+    <div className="w-full space-y-4">
+      <div className="flex justify-between items-center">
+        <Button 
+          variant="outline" 
+          onClick={onReset}
+          className="bg-transparent text-white hover:bg-purple-900"
+        >
           Reset
         </Button>
-        <Button onClick={generatePDF} className="bg-primary">
+        <Button 
+          onClick={generatePDF}
+          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600"
+        >
           Download PDF
         </Button>
       </div>
       
-      <ScrollArea className="h-[600px] w-full rounded-md border p-6 bg-white text-black">
+      <div className="bg-[#12111A] rounded-lg p-6">
         <div className="space-y-1">
           {formattedContent}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 };
