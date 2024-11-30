@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { PDFDownloadLink } from '@react-pdf/renderer';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { jsPDF } from 'jspdf';
 
 interface OptimizedCVProps {
@@ -9,6 +9,49 @@ interface OptimizedCVProps {
 }
 
 const OptimizedCV: React.FC<OptimizedCVProps> = ({ content, onReset }) => {
+  useEffect(() => {
+    console.log('CV Content:', content); // Debug log
+  }, [content]);
+
+  // Format content for preview
+  const formattedContent = content
+    // Remove introductory text
+    .replace(/^Here is the optimized CV:[\n\s]*/i, '')
+    .split('\n')
+    .map((line, index) => {
+      // Skip empty lines
+      if (!line.trim()) return null;
+      
+      // Headers (all caps)
+      if (line.trim().match(/^[A-Z][A-Z\s&]+$/)) {
+        return (
+          <h2 key={index} className="text-lg font-bold mt-4 mb-2 pb-1 border-b border-gray-300">
+            {line.trim()}
+          </h2>
+        );
+      }
+
+      // Job titles/positions (first line after company or first line of section)
+      if (line.includes('Producer') || 
+          line.includes('Designer') || 
+          line.includes('Editor') || 
+          line.includes('Artist') ||
+          line.includes('Department')) {
+        return (
+          <p key={index} className="text-base font-semibold mb-1 whitespace-pre-wrap">
+            {line.trim()}
+          </p>
+        );
+      }
+      
+      // Regular lines
+      return (
+        <p key={index} className="text-base mb-1 whitespace-pre-wrap">
+          {line.trim()}
+        </p>
+      );
+    }).filter(Boolean); // Remove null entries
+
   const generatePDF = () => {
     const doc = new jsPDF({
       orientation: 'portrait',
@@ -170,18 +213,21 @@ const OptimizedCV: React.FC<OptimizedCVProps> = ({ content, onReset }) => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="bg-white rounded-lg border p-6">
-        <pre className="whitespace-pre-wrap font-mono text-sm">{content}</pre>
-      </div>
-      <div className="flex justify-end space-x-4">
-        <Button onClick={onReset} variant="outline">
+    <div className="w-full max-w-4xl mx-auto space-y-4">
+      <div className="flex justify-between items-center my-8">
+        <Button variant="outline" onClick={onReset}>
           Reset
         </Button>
-        <Button onClick={generatePDF}>
+        <Button onClick={generatePDF} className="bg-primary">
           Download PDF
         </Button>
       </div>
+      
+      <ScrollArea className="h-[600px] w-full rounded-md border p-6 bg-white text-black">
+        <div className="space-y-1">
+          {formattedContent}
+        </div>
+      </ScrollArea>
     </div>
   );
 };
