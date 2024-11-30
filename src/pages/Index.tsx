@@ -3,15 +3,22 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Terminal, FileText, Sparkles, Download } from "lucide-react";
+import { ApiKeyContext } from "@/contexts/ApiKeyContext";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import CVUploader from "@/components/CVUploader";
 import JobDescription from "@/components/JobDescription";
 import OptimizedCV from "@/components/OptimizedCV";
 import { processCV } from "@/services/aiService";
 import { AISettings } from "@/components/AISettings";
-import { ApiKeyContext } from "@/contexts/ApiKeyContext";
-import { Terminal, FileText, Sparkles, Download } from "lucide-react";
-import { Label, Input, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/form";
 
 const Index = () => {
   const { apiKey, setApiKey } = useContext(ApiKeyContext);
