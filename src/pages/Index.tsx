@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -9,35 +9,31 @@ import JobDescription from "@/components/JobDescription";
 import OptimizedCV from "@/components/OptimizedCV";
 import { processCV } from "@/services/aiService";
 import { AISettings } from "@/components/AISettings";
+import { ApiKeyContext } from "@/contexts/ApiKeyContext";
+import { Terminal, FileText, Sparkles, Download } from "lucide-react";
+import { Label, Input, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/form";
 
 const Index = () => {
-  const [cvText, setCvText] = useState("");
-  const [jobDescription, setJobDescription] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [optimizedCV, setOptimizedCV] = useState("");
-  const [error, setError] = useState("");
+  const { apiKey, setApiKey } = useContext(ApiKeyContext);
+  const [selectedModel, setSelectedModel] = useState<string>('gpt-3.5-turbo');
+  const [cvContent, setCvContent] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [generatedCvContent, setGeneratedCvContent] = useState<string>('');
   const { toast } = useToast();
 
   const handleOptimize = async () => {
-    setError(""); // Clear any previous errors
+    setError(null);
     
-    if (!cvText || !jobDescription) {
-      setError("Please provide both a CV and job description");
+    if (!cvContent) {
+      setError("Please provide your CV content");
       return;
     }
 
-    const provider = localStorage.getItem("aiProvider") || "openai";
-    const apiKey = localStorage.getItem(`${provider}ApiKey`);
-
-    if (!apiKey) {
-      setError(`Please configure your ${provider === 'openai' ? 'OpenAI' : 'Anthropic'} API key in the settings (gear icon) before proceeding.`);
-      return;
-    }
-
-    setIsProcessing(true);
+    setIsLoading(true);
     try {
-      const processedCV = await processCV(cvText, jobDescription);
-      setOptimizedCV(processedCV);
+      const processedCV = await processCV(cvContent);
+      setGeneratedCvContent(processedCV);
       toast({
         title: "Success!",
         description: "Your CV has been optimized for ATS compatibility",
@@ -45,110 +41,157 @@ const Index = () => {
     } catch (error) {
       setError(error instanceof Error ? error.message : "An error occurred while processing your CV");
     } finally {
-      setIsProcessing(false);
+      setIsLoading(false);
     }
   };
 
-  const handleReset = () => {
-    setOptimizedCV("");
-    setError("");
+  const downloadPDF = (content: string) => {
+    const blob = new Blob([content], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'optimized_cv.pdf';
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-12 relative">
-          <div className="absolute right-0 top-0">
-            <AISettings />
+    <div className="min-h-screen bg-[#0A0118] text-white">
+      {/* Header */}
+      <header className="border-b border-gray-800 bg-[#0A0118]/50 backdrop-blur-sm">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <Terminal className="w-6 h-6 text-purple-500" />
+            <span className="font-bold text-xl">CV in the Shell</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
-            CV In The Shell
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-600 font-light max-w-2xl mx-auto">
-            Command-line inspired CV builder and manager
-          </p>
-        </div>
-
-        <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6 mb-8">
-          <div className="prose prose-blue max-w-none text-center">
-            <h2 className="text-2xl font-semibold text-primary mb-6">How It Works</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 justify-items-center">
-              <div className="flex flex-col items-center text-center p-4 max-w-xs">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-3">
-                  <span className="text-primary text-xl font-semibold">1</span>
-                </div>
-                <h3 className="font-medium text-gray-900 mb-2">Paste Your CV</h3>
-                <p className="text-gray-600 text-sm">Upload your existing CV in any format. Our AI will preserve its core content.</p>
-              </div>
-              <div className="flex flex-col items-center text-center p-4 max-w-xs">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-3">
-                  <span className="text-primary text-xl font-semibold">2</span>
-                </div>
-                <h3 className="font-medium text-gray-900 mb-2">Add Job Description</h3>
-                <p className="text-gray-600 text-sm">Include the target job description to optimize your CV for the role.</p>
-              </div>
-              <div className="flex flex-col items-center text-center p-4 max-w-xs">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-3">
-                  <span className="text-primary text-xl font-semibold">3</span>
-                </div>
-                <h3 className="font-medium text-gray-900 mb-2">Get Optimized CV</h3>
-                <p className="text-gray-600 text-sm">Receive your enhanced, ATS-friendly CV tailored to the position.</p>
-              </div>
-            </div>
+          <div className="flex items-center space-x-4">
+            <a href="#" className="text-gray-400 hover:text-white transition-colors">Demo</a>
+            <Button 
+              variant="default"
+              className="bg-gradient-to-r from-primary-gradient-from via-primary-gradient-via to-primary-gradient-to hover:opacity-90 transition-opacity"
+            >
+              Create Your CV
+            </Button>
           </div>
         </div>
+      </header>
 
-        {error && (
-          <div className="bg-destructive/15 border-destructive/50 border rounded-lg p-4 text-destructive">
-            {error}
-          </div>
-        )}
-        
-        <div className="grid md:grid-cols-2 gap-6">
-          <Card className="p-6 space-y-4">
-            <h2 className="text-2xl font-semibold text-primary">Upload CV</h2>
-            <CVUploader onCVText={setCvText} />
-            <div className="my-2">
-              <p className="text-sm text-muted-foreground mb-2">Or paste your CV text:</p>
-              <Textarea
-                placeholder="Paste your CV content here..."
-                value={cvText}
-                onChange={(e) => setCvText(e.target.value)}
-                className="min-h-[200px]"
-              />
+      {/* Hero Section */}
+      <main className="container mx-auto px-4 py-16 text-center">
+        <h1 className="text-5xl font-bold mb-6">
+          Your Professional CV,{' '}
+          <span className="bg-gradient-to-r from-primary-gradient-from via-primary-gradient-via to-primary-gradient-to bg-clip-text text-transparent">
+            Unleashed
+          </span>
+        </h1>
+        <p className="text-gray-400 text-xl mb-12 max-w-2xl mx-auto">
+          Create stunning CVs powered by AI. Join our exclusive community of professionals and stand out from the crowd.
+        </p>
+
+        {/* Feature Cards */}
+        <div className="grid md:grid-cols-3 gap-8 mb-12">
+          <Card className="bg-[#1A1127] border-gray-800 p-6">
+            <div className="mb-4">
+              <FileText className="w-10 h-10 text-purple-500" />
             </div>
+            <h3 className="text-xl font-semibold mb-2">Smart Templates</h3>
+            <p className="text-gray-400">Choose from AI-powered templates or create your custom CV design.</p>
           </Card>
+          <Card className="bg-[#1A1127] border-gray-800 p-6">
+            <div className="mb-4">
+              <Sparkles className="w-10 h-10 text-purple-500" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">AI Enhancement</h3>
+            <p className="text-gray-400">Let AI optimize your content for maximum impact and professionalism.</p>
+          </Card>
+          <Card className="bg-[#1A1127] border-gray-800 p-6">
+            <div className="mb-4">
+              <Download className="w-10 h-10 text-purple-500" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">Export Options</h3>
+            <p className="text-gray-400">Download your CV in multiple formats including PDF and Word.</p>
+          </Card>
+        </div>
 
-          <Card className="p-6">
-            <JobDescription
-              value={jobDescription}
-              onChange={setJobDescription}
+        {/* Main CV Editor */}
+        <div className="bg-[#1A1127] border border-gray-800 rounded-lg p-6">
+          <div className="mb-6">
+            <Label htmlFor="apiKey" className="text-left block mb-2">OpenAI API Key</Label>
+            <Input
+              type="password"
+              id="apiKey"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              className="bg-[#0A0118] border-gray-800 text-white"
+              placeholder="Enter your OpenAI API key"
             />
-          </Card>
-        </div>
+          </div>
 
-        <div className="flex justify-center gap-4 mt-12 mb-16">
+          <div className="mb-6">
+            <Label htmlFor="model" className="text-left block mb-2">AI Model</Label>
+            <Select value={selectedModel} onValueChange={setSelectedModel}>
+              <SelectTrigger className="bg-[#0A0118] border-gray-800">
+                <SelectValue placeholder="Select a model" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#1A1127] border-gray-800">
+                <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+                <SelectItem value="gpt-4">GPT-4</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="mb-6">
+            <Label htmlFor="cv-content" className="text-left block mb-2">Your CV Content</Label>
+            <Textarea
+              id="cv-content"
+              value={cvContent}
+              onChange={(e) => setCvContent(e.target.value)}
+              className="bg-[#0A0118] border-gray-800 h-48"
+              placeholder="Paste your current CV content here..."
+            />
+          </div>
+
           <Button
             onClick={handleOptimize}
-            size="lg"
-            className="min-w-[200px] font-semibold"
-            disabled={isProcessing || !cvText || !jobDescription}
+            disabled={isLoading || !apiKey || !cvContent}
+            className="w-full bg-gradient-to-r from-primary-gradient-from via-primary-gradient-via to-primary-gradient-to hover:opacity-90 transition-opacity"
           >
-            {isProcessing ? (
-              <>
+            {isLoading ? (
+              <div className="flex items-center">
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Optimizing...
-              </>
+              </div>
             ) : (
-              "Optimize CV"
+              'Optimize CV'
             )}
           </Button>
-        </div>
 
-        {optimizedCV && (
-          <OptimizedCV content={optimizedCV} onReset={handleReset} />
-        )}
-      </div>
+          {error && (
+            <div className="mt-4 p-4 bg-red-900/50 border border-red-800 rounded-lg text-red-200">
+              {error}
+            </div>
+          )}
+
+          {generatedCvContent && (
+            <div className="mt-6">
+              <Label className="text-left block mb-2">Optimized CV</Label>
+              <div className="bg-[#0A0118] border border-gray-800 rounded-lg p-4 whitespace-pre-wrap">
+                {generatedCvContent}
+              </div>
+              <div className="mt-4 flex justify-end space-x-4">
+                <Button
+                  variant="outline"
+                  onClick={() => downloadPDF(generatedCvContent)}
+                  className="border-gray-800 hover:bg-[#1A1127]"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Download PDF
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 };
